@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAPIDemo.Models;
+using WebAPIDemo.Models.Repositories;
 
 namespace WebAPIDemo.Controllers
 {
@@ -27,7 +28,7 @@ namespace WebAPIDemo.Controllers
             if (id <= 0)
                 return BadRequest();
 
-            var shirt = shirts.FirstOrDefault(x => x.ShirtId == id);
+            var shirt = ShirtRepository.GetShirtById(id);
             if (shirt == null)
                 return NotFound();
 
