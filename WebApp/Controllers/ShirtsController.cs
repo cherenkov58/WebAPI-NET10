@@ -14,7 +14,7 @@ namespace WebApp.Controllers
         }
 
         public async Task<IActionResult> Index()
-        {            
+        {
             return View(await webApiExecuter.InvokeGet<List<Shirt>>("shirts"));
         }
 
@@ -49,7 +49,7 @@ namespace WebApp.Controllers
             return NotFound();
         }
 
-        [HttpPost] 
+        [HttpPost]
         public async Task<IActionResult> UpdateShirt(Shirt shirt)
         {
             if (ModelState.IsValid)
@@ -59,6 +59,13 @@ namespace WebApp.Controllers
             }
 
             return View(shirt);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteShirt([FromForm] int shirtId)
+        {
+            await webApiExecuter.InvokeDelete($"shirts/{shirtId}");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

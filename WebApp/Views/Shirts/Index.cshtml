@@ -11,6 +11,7 @@
             <td>Size</td>
             <td>Price</td>
             <td></td>
+            <td></td>
         </tr>
     </thead>
     <tbody>
@@ -23,6 +24,12 @@
                 <td>@shirt.Size</td>
                 <td>@(shirt.Price.HasValue?shirt.Price.Value.ToString("c"):"")</td>
                 <td><a class="btn btn-link" asp-controller="shirts" asp-action="updateshirt" asp-route-shirtId="@shirt.ShirtId">Edit</a></td>
+                <td>
+                    <form method="post" asp-controller="shirts" asp-action="deleteshirt" onsubmit="return confirm('Are you sure you want to delete this shirt?');">
+                        <input type="hidden" name="shirtId" value="@shirt.ShirtId" />
+                        <button type="submit" class="btn btn-link">Delete</button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>
