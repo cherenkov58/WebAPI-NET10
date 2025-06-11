@@ -39,11 +39,58 @@ namespace WebAPIDemo.Authority
                 SigningCredentials = signingCredentials,
                 Claims = claimsDictionary,
                 Expires = expiresAt,
-                NotBefore = DateTime.UtcNow,
+                NotBefore = DateTime.UtcNow,              
             };
 
             var tokenHandler = new JsonWebTokenHandler();
             return tokenHandler.CreateToken(tokenDescriptor);
+        }
+
+        public static async Task<bool> VerifyTokenAsync(string tokenString, string securityKey)
+        {
+            if (string.IsNullOrWhiteSpace(tokenString) || string.IsNullOrWhiteSpace(securityKey))
+            {
+                return false;
+            }
+
+            var keyBytes = System.Text.Encoding.UTF8.GetBytes(securityKey);
+            var tokenHander = new JsonWebTokenHandler();
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero // No clock skew
+            };
+
+            try
+            {
+                var result = await tokenHander.ValidateTokenAsync(tokenString, validationParameters);
+                return result.IsValid;
+            }
+            catch(SecurityTokenMalformedException)
+            {
+                // Token is malformed
+                return false;
+            }
+            catch(SecurityTokenExpiredException)
+            {
+                // Token is expired
+                return false;
+            }
+            catch(SecurityTokenInvalidSignatureException)
+            {
+                // Token signature is invalid
+                return false;
+            }
+            catch(Exception)
+            {
+                // Other exceptions
+                throw;
+            }
         }
     }
 }
