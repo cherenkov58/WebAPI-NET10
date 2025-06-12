@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using WebApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,9 +16,18 @@ builder.Services.AddHttpClient("AuthorityApi", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
-builder.Services.AddTransient<IWebApiExecuter, WebApiExecuter>();
+builder.Services.AddSession(options => 
+{
+    options.Cookie.HttpOnly = true;
+    options.IdleTimeout = TimeSpan.FromHours(5);
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddTransient<IWebApiExecuter, WebApiExecuter>();
 
 var app = builder.Build();
 
@@ -33,6 +43,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapStaticAssets();
 
