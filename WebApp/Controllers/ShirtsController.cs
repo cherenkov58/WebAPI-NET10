@@ -16,7 +16,16 @@ namespace WebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await webApiExecuter.InvokeGet<List<Shirt>>("shirts"));
+            try
+            {
+                return View(await webApiExecuter.InvokeGet<List<Shirt>>("shirts"));
+            }
+            catch (WebApiException ex)
+            {
+                HandleWebApiException(ex);
+            }
+
+            return View(new List<Shirt>());
         }
 
         public IActionResult CreateShirt()
@@ -110,6 +119,14 @@ namespace WebApp.Controllers
                 {
                     ModelState.AddModelError(error.Key, string.Join("; ", error.Value));
                 }
+            }
+            else if (ex.ErrorResponse != null) 
+            {
+                ModelState.AddModelError("Error", ex.ErrorResponse.Title);
+            }
+            else
+            {
+                ModelState.AddModelError("Error", ex.Message);
             }
         }
     }
