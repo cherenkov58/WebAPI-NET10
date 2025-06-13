@@ -1,3 +1,5 @@
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using WebAPIDemo.Data;
@@ -41,9 +43,33 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("x-api-version"),
+        new QueryStringApiVersionReader("api-version")
+    );
+})
+.AddApiExplorer();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+if (app.Environment.IsDevelopment())
+{
+   Console.WriteLine("Discovered API versions:");
+   foreach(var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+   {
+       Console.WriteLine($"- {description.GroupName} (v{description.ApiVersion})");
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -51,6 +77,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/openapi/v1.json", "WebAPIDemo API v1");
+        options.SwaggerEndpoint("/openapi/v2.json", "WebAPIDemo API v1");
     });
 }
 

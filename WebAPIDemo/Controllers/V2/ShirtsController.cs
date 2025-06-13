@@ -9,10 +9,10 @@ using WebAPIDemo.Filters.ExceptionFilters;
 using WebAPIDemo.Models;
 using WebAPIDemo.Models.Repositories;
 
-namespace WebAPIDemo.Controllers
+namespace WebAPIDemo.Controllers.V2
 {
-    [ApiVersion("1.0")]
-    [ApiExplorerSettings(GroupName = "v1")]
+    [ApiVersion("2.0")]
+    [ApiExplorerSettings(GroupName = "v2")]
     [ApiController] 
     [Route("api/[controller]")]
     [JwtTokenAuthFilter]
@@ -29,7 +29,7 @@ namespace WebAPIDemo.Controllers
         [RequiredClaim("read", "true")]
         public IActionResult GetShirts()
         {
-            Console.WriteLine("V1: GetShirts called");
+            Console.WriteLine("V2: GetShirts called");
             return Ok(db.Shirts.ToList());
         }
 
