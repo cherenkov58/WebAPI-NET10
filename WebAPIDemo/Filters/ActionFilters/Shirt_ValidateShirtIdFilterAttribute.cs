@@ -1,12 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebAPIDemo.Data;
 using WebAPIDemo.Models.Repositories;
 
 namespace WebAPIDemo.Filters.ActionFilters
 {
     public class Shirt_ValidateShirtIdFilterAttribute : ActionFilterAttribute
     {
-        public override void OnActionExecuting(ActionExecutingContext context)
+		private readonly ApplicationDbContext db;
+
+		public Shirt_ValidateShirtIdFilterAttribute(ApplicationDbContext db)
+        {
+			this.db = db;
+		}
+		public override void OnActionExecuting(ActionExecutingContext context)
         {
             base.OnActionExecuting(context);
 
@@ -22,16 +29,25 @@ namespace WebAPIDemo.Filters.ActionFilters
                     };
                     context.Result = new BadRequestObjectResult(problemDetails);
                 }
-                else if (!ShirtRepository.ShirtExists(shirtId.Value))
+                else 
                 {
-                    context.ModelState.AddModelError("ShirtId", "Shirt doesn't exist.");
-                    var problemDetails = new ValidationProblemDetails(context.ModelState)
-                    {
-                        Status = StatusCodes.Status404NotFound
-                    };
-                    context.Result = new NotFoundObjectResult(problemDetails);
-                }
-            }
+                    var shirtExists = db.Shirts.Find(shirtId.Value);
+
+                    if (shirtExists== null){
+						context.ModelState.AddModelError("ShirtId", "Shirt doesn't exist.");
+						var problemDetails = new ValidationProblemDetails(context.ModelState)
+						{
+							Status = StatusCodes.Status404NotFound
+						};
+						context.Result = new NotFoundObjectResult(problemDetails);
+					}
+                    else
+					{
+						// Shirt exists, proceed with the actioncommand
+                        context.HttpContext.Items["shirt"] = shirtExists;
+
+					}
+				}
         }
     }
 }

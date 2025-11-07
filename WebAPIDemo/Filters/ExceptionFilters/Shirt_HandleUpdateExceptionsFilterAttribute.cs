@@ -1,12 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using WebAPIDemo.Data;
 using WebAPIDemo.Models.Repositories;
 
 namespace WebAPIDemo.Filters.ExceptionFilters
 {
 	public class Shirt_HandleUpdateExceptionsFilterAttribute: ExceptionFilterAttribute
 	{
+		private readonly ApplicationDbContext db;
+
+		public Shirt_HandleUpdateExceptionsFilterAttribute(ApplicationDbContext db)
+		{
+			this.db = db;
+		}
 		public override void OnException(ExceptionContext context)
 		{
 			base.OnException(context);
@@ -14,7 +21,7 @@ namespace WebAPIDemo.Filters.ExceptionFilters
 			if (strShirtId != null) {
 				if (int.TryParse(strShirtId, out int shirtId))
 				{
-				if (!ShirtRepository.ShirtExists(shirtId)){
+				if (db.Shirts.FirstOrDefault(x=>x.ShirtId==shirtId)==null){
 						context.ModelState.AddModelError("Shirt", "Shirt does not exist anymore.");
 						var problemDetails = new ValidationProblemDetails(context.ModelState)
 						{
