@@ -12,12 +12,12 @@ namespace WebAPIDemo.Controllers
     [Route("api/[controller]")]
     public class ShirtsController : ControllerBase
     {
-        public readonly ApplicationDbContext db;
+        private readonly ApplicationDbContext db;
 
-		public ShirtsController(ApplicationDbContext db) 
+        public ShirtsController(ApplicationDbContext db)
         {
-			this.db = db;
-		}
+            this.db = db;
+        }
 
         [HttpGet]
         public IActionResult GetShirts()
@@ -33,45 +33,45 @@ namespace WebAPIDemo.Controllers
         }
 
         [HttpPost]
-		[TypeFilter(typeof(Shirt_ValidateCreateShirtFilterAttribute))]
-		public IActionResult CreateShirt([FromBody] Shirt shirt)
+        [TypeFilter(typeof(Shirt_ValidateCreateShirtFilterAttribute))]
+        public IActionResult CreateShirt([FromBody] Shirt shirt)
         {
-
             this.db.Shirts.Add(shirt);
             this.db.SaveChanges();
 
-			return CreatedAtAction(nameof(GetShirtById),
-				new { id = shirt.ShirtId },
-				shirt);
-		}
+            return CreatedAtAction(nameof(GetShirtById),
+                new { id = shirt.ShirtId },
+                shirt);
+        }
 
         [HttpPut("{id}")]
-		[TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
-		[TypeFilter(typeof(Shirt_HandleUpdateExceptionsFilterAttribute))]
-	    public IActionResult UpdateShirt(int id, Shirt shirt)
+        [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
+        [Shirt_ValidateUpdateShirtFilter]
+        [TypeFilter(typeof(Shirt_HandleUpdateExceptionsFilterAttribute))]
+        public IActionResult UpdateShirt(int id, Shirt shirt)
         {
             var shirtToUpdate = HttpContext.Items["shirt"] as Shirt;
-			shirtToUpdate.Brand = shirt.Brand;
-			shirtToUpdate.Color = shirt.Color;
-			shirtToUpdate.Price = shirt.Price;
-			shirtToUpdate.Size = shirt.Size;
-			shirtToUpdate.Gender = shirt.Gender;
+            shirtToUpdate.Brand = shirt.Brand;
+            shirtToUpdate.Price = shirt.Price;
+            shirtToUpdate.Size = shirt.Size;
+            shirtToUpdate.Color = shirt.Color;
+            shirtToUpdate.Gender = shirt.Gender;
+
             db.SaveChanges();
 
-			return NoContent();
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-		[TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
-		//[Shirt_HandleUpdateExceptionsFilter]
-		public IActionResult DeleteShirt(int id)
+        [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
+        public IActionResult DeleteShirt(int id)
         {
-			var shirtToDelete = HttpContext.Items["shirt"] as Shirt;
+            var shirtToDelete = HttpContext.Items["shirt"] as Shirt;
+            
+            db.Shirts.Remove(shirtToDelete);
+            db.SaveChanges();
 
-			db.Shirts.Remove(shirtToDelete);
-			db.SaveChanges();
-
-			return Ok(shirtToDelete);
+            return Ok(shirtToDelete);
         }
     }
 }

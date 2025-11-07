@@ -7,13 +7,14 @@ namespace WebAPIDemo.Filters.ActionFilters
 {
     public class Shirt_ValidateShirtIdFilterAttribute : ActionFilterAttribute
     {
-		private readonly ApplicationDbContext db;
+        private readonly ApplicationDbContext db;
 
-		public Shirt_ValidateShirtIdFilterAttribute(ApplicationDbContext db)
+        public Shirt_ValidateShirtIdFilterAttribute(ApplicationDbContext db)
         {
-			this.db = db;
-		}
-		public override void OnActionExecuting(ActionExecutingContext context)
+            this.db = db;
+        }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             base.OnActionExecuting(context);
 
@@ -29,25 +30,25 @@ namespace WebAPIDemo.Filters.ActionFilters
                     };
                     context.Result = new BadRequestObjectResult(problemDetails);
                 }
-                else 
+                else
                 {
-                    var shirtExists = db.Shirts.Find(shirtId.Value);
+                    var shirt = db.Shirts.Find(shirtId.Value);
 
-                    if (shirtExists== null){
-						context.ModelState.AddModelError("ShirtId", "Shirt doesn't exist.");
-						var problemDetails = new ValidationProblemDetails(context.ModelState)
-						{
-							Status = StatusCodes.Status404NotFound
-						};
-						context.Result = new NotFoundObjectResult(problemDetails);
-					}
+                    if (shirt == null)
+                    {
+                        context.ModelState.AddModelError("ShirtId", "Shirt doesn't exist.");
+                        var problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Status = StatusCodes.Status404NotFound
+                        };
+                        context.Result = new NotFoundObjectResult(problemDetails);
+                    }
                     else
-					{
-						// Shirt exists, proceed with the actioncommand
-                        context.HttpContext.Items["shirt"] = shirtExists;
-
-					}
-				}
+                    {
+                        context.HttpContext.Items["shirt"] = shirt;
+                    }
+                }
+            }
         }
     }
 }

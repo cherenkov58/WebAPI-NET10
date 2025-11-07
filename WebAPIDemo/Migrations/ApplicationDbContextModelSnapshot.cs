@@ -16,7 +16,7 @@ namespace WebAPIDemo.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -83,7 +83,7 @@ namespace WebAPIDemo.Migrations
                         {
                             ShirtId = 4,
                             Brand = "Your Brand",
-                            Color = "Yellow",
+                            Color = "Yello",
                             Gender = "Women",
                             Price = 30.0,
                             Size = 9
