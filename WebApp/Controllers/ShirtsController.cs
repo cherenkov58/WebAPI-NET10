@@ -28,25 +28,83 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await webApiExecuter.InvokePost("shirts", shirt);
-                if (response != null)
+            try{
+					var response = await webApiExecuter.InvokePost("shirts", shirt);
+					if (response != null)
+					{
+						return RedirectToAction(nameof(Index));
+					}
+
+				}
+                catch (WebApiException ex)
                 {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
+					HandleWebApiException(ex);
+				}
+
+
+			}
 
             return View(shirt);
         }
 
         public async Task<IActionResult> UpdateShirt(int shirtId)
         {
-            var shirt = await webApiExecuter.InvokeGet<Shirt>($"shirts/{shirtId}");
-            if (shirt != null)
+            try
             {
-                return View(shirt);
+				var shirt = await webApiExecuter.InvokeGet<Shirt>($"shirts/{shirtId}");
+ 
+				return View(shirt);
+				
+			}
+            catch (WebApiException ex)
+            {
+				HandleWebApiException(ex);
+			}
+            return NotFound();
+
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> UpdateShirt(Shirt shirt)
+		{
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await webApiExecuter.InvokePut($"shirts/{shirt.ShirtId}", shirt);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (WebApiException ex)
+                {
+                    HandleWebApiException(ex);
+                    return View();
+				}
             }
 
-            return NotFound();
-        }
-    }
+			return NotFound();
+		}
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteShirt([FromForm] int shirtId)
+        {
+            await webApiExecuter.InvokeDelete($"shirts/{shirtId}");
+            return RedirectToAction(nameof(Index));
+		}
+
+        private void HandleWebApiException(WebApiException ex)
+        {
+            if (ex.ErrorResponse != null && ex.ErrorResponse.Errors != null && ex.ErrorResponse.Errors.Count > 0)
+            {
+                foreach (var error in ex.ErrorResponse.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, string.Join(";", error.Value));
+                }
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
+            }
+		}
+	}
 }
