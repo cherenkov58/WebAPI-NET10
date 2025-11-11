@@ -1,7 +1,13 @@
 ﻿@model List<Shirt>
 
+    <div class="text-danger" asp-validation-summary="All"></div>
+
 <h3>Shirts</h3>
 <br/>
+@if (Model !=null)
+{
+    <p>Found @Model.Count shirt(s).</p>
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -34,5 +40,6 @@
         }
     </tbody>
 </table>
-<br />
+    <br />
+}
 <a class="btn btn-primary" asp-controller="shirts" asp-action="createshirt">Create</a>
